@@ -1,5 +1,4 @@
 import com.google.common.base.Strings;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,12 +6,15 @@ import java.util.List;
 public class Flight {
   List<String> layovers;
   String number;
-  int cr;
+  int crInMinutes;
   double perDiem;
-  int tafb;
-  int totalTime;
+  int tafbInMinutes;
+  int totalTimeInMinutes;
   double totalPay;
   double totalPayPerHour;
+  String reportingTime;
+  String releaseTime;
+  int blockedDays;
 
   public Flight() {
     this.layovers = new ArrayList<>();
@@ -23,10 +25,10 @@ public class Flight {
   }
 
   public void addCr(String cr) {
-    this.cr = getMinutes(cr);
+    this.crInMinutes = getMinutes(cr);
   }
 
-  private static int getMinutes(String cr) {
+  static int getMinutes(String cr) {
     String[] time = cr.split(":");
     return  60 * Integer.parseInt(time[0]) + Integer.parseInt(time[1]);
   }
@@ -36,26 +38,24 @@ public class Flight {
   }
 
   public void addTafb(String tafb) {
-    this.tafb = getMinutes(tafb);
+    this.tafbInMinutes = getMinutes(tafb);
   }
 
   public void finalizeFlight() {
-    this.totalTime = this.tafb + 2 * Main.COMMUTE_TIME;
-    this.totalPay = this.perDiem + ((this.cr/60.0) * Main.PAY_PER_HOUR);
-    this.totalPayPerHour = this.totalPay / (this.totalTime / 60.0);
+    this.totalTimeInMinutes = this.tafbInMinutes + 2 * Main.COMMUTE_TIME_IN_MINUTES;
+    this.totalPay = this.perDiem + ((this.crInMinutes / 60.0) * Main.PAY_PER_HOUR);
+    this.totalPayPerHour = this.totalPay / (this.totalTimeInMinutes / 60.0);
   }
 
   @Override
   public String toString() {
-    return this.number + " Total Pay/Hour = " + Main.MYFORMAT.format(this.totalPayPerHour) +
-        "   Total Pay = $" + Main.MYFORMAT.format(this.totalPay) + "   Total time = " + minutesToHHmm(this.totalTime);
+    return String.format(this.number + " Total Pay/Hour = %.2f" +
+        "   Total Pay = $%.0f   Total time = "
+        + Main.minutesToHHmm(this.totalTimeInMinutes), this.totalPayPerHour, this.totalPay)
+        + "   Reporting time " + this.reportingTime;
   }
 
   public boolean isValid() {
-    return !Strings.isNullOrEmpty(number) && tafb > 0 && totalPay > 0 && totalTime > 0 && perDiem > 0 && cr > 0;
-  }
-
-  public String minutesToHHmm(int minutes) {
-    return minutes/60 + ":" + minutes%60;
+    return !Strings.isNullOrEmpty(number) && tafbInMinutes > 0 && totalPay > 0 && totalTimeInMinutes > 0 && perDiem > 0 && crInMinutes > 0;
   }
 }

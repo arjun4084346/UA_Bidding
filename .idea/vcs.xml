@@ -11,7 +11,14 @@
           <option name="issueRegexp" value="RB[\-=](\d+)" />
           <option name="linkRegexp" value="https://go/rb $1" />
         </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="\(#(\d+)\)" />
+          <option name="linkRegexp" value="https://https///github.com/arjun4084346/UA_Bidding/issues/$1" />
+        </IssueNavigationLink>
       </list>
     </option>
+  </component>
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
   </component>
 </project>
