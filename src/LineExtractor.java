@@ -15,18 +15,20 @@ public class LineExtractor {
     if (Strings.isNullOrEmpty(lineText)) {
       return;
     }
-    List<String> tokens = Main.LIST_SPLITTER.splitToList(lineText);
-    if (lineText.startsWith(Main.LINES_SEPARATOR)) {
+    List<String> tokens = Utils.LIST_SPLITTER.splitToList(lineText);
+    if (lineText.startsWith(Utils.LINES_SEPARATOR)) {
       Line line = finishCurrentLine();
       if (line.isValid()) {
         lines.add(line);
+      } else {
+        Utils.invalidLines++;
       }
       reset();
     } else if (tokens.get(0).equals("LINE")) {
       currentLine.number = "L" + tokens.get(1);
-      currentLine.crInMinutes = Flight.getMinutes(tokens.get(3));
+      currentLine.crInMinutes = Utils.getMinutes(tokens.get(3));
     } else if (tokens.get(0).equals("TAFB")) {
-      currentLine.tafbInMinutes = Flight.getMinutes(tokens.get(1));
+      currentLine.tafbInMinutes = Utils.getMinutes(tokens.get(1));
     } else if (tokens.get(0).equals("CREW")) {
       addFlights(tokens, currentLine);
     }
