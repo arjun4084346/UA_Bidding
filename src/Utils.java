@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,9 @@ public class Utils {
     Utils.loadFlights(allFlights);
     Utils.loadLines(allLines);
 
-    Flight reserveFlight = Flight.builder().number("F-XXX").waitTimeInMinutes(0).numberOfFlightsWithGroundTime(0).numberOfLayovers(0)
-        .numberOfFlights(0).crInMinutes(300).tafbInMinutes(255).perDiem(0.0).blockedDays(1).build();
+    Flight reserveFlight = Flight.builder().number("F-XXX").waitTimeInMinutes(0).numberOfFlightsWithGroundTime(0)
+        .numberOfLayovers(0).numberOfFlights(0).crInMinutes(300).tafbInMinutes(255).perDiem(0.0).blockedDays(1)
+        .reportingTime("00:00").furtherReportingTimes(Collections.emptyList()).build();
     reserveFlight.finalizeFlight();
     allFlights.put("F-XXX", reserveFlight);
 
@@ -42,76 +44,80 @@ public class Utils {
   }
 
   public static void loadFlights(Map<String, Flight> allFlights) {
-    FlightExtractor flightExtractor1 = new FlightExtractor();
-    FlightExtractor flightExtractor2 = new FlightExtractor();
+    for (String file : UnitedBidding.FILES) {
+      FlightExtractor flightExtractor1 = new FlightExtractor();
+      FlightExtractor flightExtractor2 = new FlightExtractor();
 
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(UnitedBidding.FILE));
+      try {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
 
-      String line;
-      while ((line = reader.readLine()) != null) {
-        lineNumber++;
-        String trimmedline = line.trim();
-        if (trimmedline.startsWith("BASE")) {
-          do {
-            line = reader.readLine().trim();
-            lineNumber++;
-          } while (!line.startsWith("---"));
-          line = reader.readLine();
+        String line;
+        while ((line = reader.readLine()) != null) {
           lineNumber++;
+          String trimmedline = line.trim();
+          if (trimmedline.startsWith("BASE")) {
+            do {
+              line = reader.readLine().trim();
+              lineNumber++;
+            } while (!line.startsWith("---"));
+            line = reader.readLine();
+            lineNumber++;
+          }
+          if (line.startsWith(LINES_SEPARATOR)) {
+            break;
+          }
+          if (line.length() < COLUMN_SEPARATOR) {
+            continue;
+          }
+          flightExtractor1.feedLine(line.substring(0, COLUMN_SEPARATOR).trim());
+          flightExtractor2.feedLine(line.substring(COLUMN_SEPARATOR).trim());
         }
-        if (line.startsWith(LINES_SEPARATOR)) {
-          break;
-        }
-        if (line.length() < COLUMN_SEPARATOR) {
-          continue;
-        }
-        flightExtractor1.feedLine(line.substring(0, COLUMN_SEPARATOR).trim());
-        flightExtractor2.feedLine(line.substring(COLUMN_SEPARATOR).trim());
+
+        reader.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+        System.err.println("An error occurred while reading the file.");
       }
 
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.err.println("An error occurred while reading the file.");
+      allFlights.putAll(flightExtractor1.flights);
+      allFlights.putAll(flightExtractor2.flights);
     }
-
-    allFlights.putAll(flightExtractor1.flights);
-    allFlights.putAll(flightExtractor2.flights);
   }
 
   public static void loadLines(List<Line> allLines) {
     LineExtractor lineExtractor = new LineExtractor();
     lineNumber = 0;
 
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader(UnitedBidding.FILE));
+    for (String file : UnitedBidding.FILES) {
+      try {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
 
-      String line;
-      while ((line = reader.readLine()) != null) {
-        lineNumber++;
-        if (line.equals(LINES_SEPARATOR)) {
-          break;
+        String line;
+        while ((line = reader.readLine()) != null) {
+          lineNumber++;
+          if (line.equals(LINES_SEPARATOR)) {
+            break;
+          }
         }
+
+        while ((line = reader.readLine()) != null) {
+          if (line.equals(RESERVE_SEPARATOR)) {
+            break;
+          }
+          if (Arrays.stream(months).anyMatch(line::contains)) {
+            reader.readLine();
+            line = reader.readLine();
+            lineNumber+=2;
+          }
+          lineExtractor.feedLine(line);
+          lineNumber++;
+        }
+
+        reader.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+        System.err.println("An error occurred while reading the file.");
       }
-
-      while ((line = reader.readLine()) != null) {
-        if (line.equals(RESERVE_SEPARATOR)) {
-          break;
-        }
-        if (Arrays.stream(months).anyMatch(line::contains)) {
-          reader.readLine();
-          line = reader.readLine();
-          lineNumber+=2;
-        }
-        lineExtractor.feedLine(line);
-        lineNumber++;
-      }
-
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.err.println("An error occurred while reading the file.");
     }
 
     allLines.addAll(lineExtractor.lines);

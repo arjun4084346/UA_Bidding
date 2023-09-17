@@ -1,3 +1,8 @@
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Triple;
 import org.testng.annotations.Test;
@@ -15,7 +20,15 @@ public class UnitedBidding {
   static final double PAY_PER_HOUR = 28.88;
   static final double PER_DIEM = 2.35;
 
-  static final String FILE = "/Users/abora/Downloads/f_sfo_pri_d_2309.txt"; // Replace with your file path
+  static final String EARLY_HOURS_TIME = "09:30";
+  static final double EARLY_HOURS_TIME_PENALTY = 30.0;
+  static final String CONNECTING_FLIGHT_EARLY_HOURS_TIME = "08:30";
+  static final double CONNECTING_FLIGHT_EARLY_HOURS_TIME_PENALTY = 20.0;
+
+  static final String[] FILES = new String[] {
+      "/Users/abora/Downloads/f_sfo_pri_d_2310.txt",
+      "/Users/abora/Downloads/f_sfo_pri_i_2310.txt"
+  };
 
   public static void main(String[] args) {
     linesDefaultSorting();
@@ -35,11 +48,31 @@ public class UnitedBidding {
   }
 
   @Test
+  public static void linesSortingWithEarlyHoursPenalty() {
+    Utils.allLines.sort(new LineComparatorWithEarlyHoursPenalty());
+    int rank = 1;
+    for (Line line : Utils.allLines) {
+      System.out.printf("Rank %3d   " + line + "\n", rank++);
+    }
+//    for (Line line : Utils.allLines) {
+//      System.out.println(line.number.substring(1));
+//    }
+  }
+  @Test
   public static void linesDefaultSorting() {
     Utils.allLines.sort(new LineComparator());
     int rank = 1;
     for (Line line : Utils.allLines) {
       System.out.printf("Rank %3d   " + line + "\n", rank++);
+    }
+  }
+
+  @Test
+  public static void flightsSortingWithEarlyHoursPenalty() {
+    Utils.sortedFlights = Utils.allFlights.values().stream().sorted(new FlightsComparatorWithEarlyHoursPenalty()).collect(Collectors.toList());
+    int rank = 1;
+    for (Flight flight : Utils.sortedFlights) {
+      System.out.printf("Rank %3d   " + flight + "\n", rank++);
     }
   }
 
@@ -112,6 +145,26 @@ public class UnitedBidding {
     int rank = 1;
     for (Triple<String, String, String> layover : Utils.layovers) {
       System.out.printf("Rank %3d  " + layover.getLeft() + "  " + layover.getMiddle() + "  " + layover.getRight() + "\n", rank++);
+    }
+  }
+
+  @Test
+  public static void reportingTimes() {
+    Map<String, Integer> reportingTimes = new TreeMap<>();
+    Utils.allFlights.values().stream().map(flight -> flight.reportingTime).forEach(time -> reportingTimes.put(time, reportingTimes.getOrDefault(time, 0) + 1));
+    for (Map.Entry<String, Integer> entry : reportingTimes.entrySet()) {
+      String key = entry.getKey();
+      Integer value = entry.getValue();
+      System.out.println(key + ": " + value);
+    }
+
+    reportingTimes.clear();
+
+    Utils.allFlights.values().stream().map(flight -> flight.furtherReportingTimes).flatMap(List::stream).forEach(time -> reportingTimes.put(time, reportingTimes.getOrDefault(time, 0) + 1));
+    for (Map.Entry<String, Integer> entry : reportingTimes.entrySet()) {
+      String key = entry.getKey();
+      Integer value = entry.getValue();
+      System.out.println(key + ": " + value);
     }
   }
 }

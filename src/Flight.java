@@ -20,6 +20,7 @@ public class Flight {
   double totalPay;
   double totalPayPerHour;
   String reportingTime;
+  List<String> furtherReportingTimes = new ArrayList<>();
   String departureTime;
   String releaseTime;
   int blockedDays;
@@ -28,6 +29,7 @@ public class Flight {
   int numberOfFlights = 0;
   List<Integer> layoverDurations = new ArrayList<>();
   int numberOfFlightsWithGroundTime = 0;
+  double earlyHourPenalty;
 
   public void addPerDiem(String perDiem) {
     this.perDiem = Double.parseDouble(perDiem);
@@ -39,6 +41,12 @@ public class Flight {
     this.totalPayPerHour = this.totalPay / (this.totalTimeInMinutes / 60.0);
     if (this.numberOfFlights > 0 && this.numberOfFlightsWithGroundTime > 0) {
       this.waitTimeInMinutesPerFlight = this.waitTimeInMinutes / (this.numberOfFlightsWithGroundTime);
+    }
+    this.earlyHourPenalty = this.reportingTime.compareTo(UnitedBidding.EARLY_HOURS_TIME) < 0
+        ? UnitedBidding.EARLY_HOURS_TIME_PENALTY : 0.0;
+    for (String furtherReportingTime : this.furtherReportingTimes) {
+      this.earlyHourPenalty += furtherReportingTime.compareTo(UnitedBidding.CONNECTING_FLIGHT_EARLY_HOURS_TIME) < 0
+          ? UnitedBidding.CONNECTING_FLIGHT_EARLY_HOURS_TIME_PENALTY : 0;
     }
   }
 

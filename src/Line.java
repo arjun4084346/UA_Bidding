@@ -17,6 +17,7 @@ public class Line {
   double totalPayPerHour;
   int waitTimeInMinutes = 0;
   int waitTimeInMinutesPerFlight;
+  double earlyHourPenalty = 0.0;
 
   public Line() {
     this.flights = new ArrayList<>();
@@ -33,6 +34,8 @@ public class Line {
     if (numberOfFlightsWithGroundTime > 0) {
       this.waitTimeInMinutesPerFlight = this.waitTimeInMinutes / (numberOfFlightsWithGroundTime);
     }
+    this.earlyHourPenalty = this.flights.stream().map(flightStr -> Utils.allFlights.get(flightStr).earlyHourPenalty).reduce(0.0, Double::sum);
+    System.out.print("");
   }
 
   public boolean isValid() {

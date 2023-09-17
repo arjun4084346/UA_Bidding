@@ -40,6 +40,8 @@ public class FlightExtractor {
       } else if (line.startsWith("F") && line.contains("RPT -->")) {
         currentFlight.number = tokens.get(0);
         currentFlight.reportingTime = tokens.get(2).substring(3);
+      } else if(line.startsWith("RPT")) {
+        currentFlight.furtherReportingTimes.add(tokens.get(1).substring(3));
       } else if (Character.isDigit(line.charAt(0)) && line.charAt(1) == ' ') {
         // flight detail
         currentFlight.departureTime = tokens.get(line.contains("*") ? 4 : 5);
