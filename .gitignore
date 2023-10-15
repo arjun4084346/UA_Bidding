@@ -1,0 +1,31 @@
+.tmp.driveupload
+# IntelliJ Files
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# Java related
+*.class
+classes/
+
+# Gradle files
+.gradle/
+gradle/
+build/
+
+# OS X
+.DS_Store
+
+# vi
+*.swp
+
+# Build files
+target/
+
+# log files
+*.log
+
+# plugin generated
+lombok.config

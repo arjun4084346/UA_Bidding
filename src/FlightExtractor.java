@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 public class FlightExtractor {
+  char flightPrefix;
   int dhd = 0; // dead head
   int tafb = 0; // time away from base
   int cr = 0;
@@ -16,6 +17,10 @@ public class FlightExtractor {
   Map<String, Flight> flights = new HashMap<>();
   Flight currentFlight = new Flight();
   String previousLine = "";
+
+  public FlightExtractor (Character flightPrefix) {
+    this.flightPrefix = flightPrefix;
+  }
 
   public void feedLine(String line) {
     if (line.equals(previousLine)) {
@@ -37,15 +42,17 @@ public class FlightExtractor {
           Utils.invalidFlights++;
         }
         reset();
-      } else if (line.startsWith("F") && line.contains("RPT -->")) {
+      } else if (line.charAt(0) == this.flightPrefix && line.contains("RPT -->")) {
         currentFlight.number = tokens.get(0);
         currentFlight.reportingTime = tokens.get(2).substring(3);
-      } else if(line.startsWith("RPT")) {
+      } else if (line.startsWith("RPT")) {
         currentFlight.furtherReportingTimes.add(tokens.get(1).substring(3));
       } else if (Character.isDigit(line.charAt(0)) && line.charAt(1) == ' ') {
         // flight detail
         currentFlight.departureTime = tokens.get(line.contains("*") ? 4 : 5);
         currentFlight.releaseTime = tokens.get(line.contains("*") ? 5 : 6);
+        // this is not true in all the cases because of time zone differences
+        // also this may be incorrect in cases when rpt is on day 1, departure is on day 2
         currentFlight.blockedDays = Integer.parseInt(line.substring(0,1)) +
             (currentFlight.departureTime.compareTo(currentFlight.releaseTime) > 0 ? 1 : 0);
         List<String> times = new ArrayList<>();
@@ -63,6 +70,8 @@ public class FlightExtractor {
         }
         if (times.size() == 4) {
           currentFlight.numberOfLayovers++;
+          currentFlight.layovers.putIfAbsent(airports.get(1), new ArrayList<>());
+          currentFlight.layovers.get(airports.get(1)).add(Utils.getMinutes(times.get(3)));
           Utils.layovers.add(new ImmutableTriple<>(airports.get(1), times.get(3), currentFlight.number));
         }
         currentFlight.numberOfFlights ++;

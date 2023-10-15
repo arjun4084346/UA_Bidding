@@ -1,9 +1,8 @@
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Triple;
 import org.testng.annotations.Test;
 
@@ -26,8 +25,8 @@ public class UnitedBidding {
   static final double CONNECTING_FLIGHT_EARLY_HOURS_TIME_PENALTY = 20.0;
 
   static final String[] FILES = new String[] {
-      "/Users/abora/Downloads/f_sfo_pri_d_2310.txt",
-      "/Users/abora/Downloads/f_sfo_pri_i_2310.txt"
+      "/home/arjun/Downloads/f_sfo_pri_d_2311.txt",
+      "/home/arjun/Downloads/f_sfo_pri_i_2311.txt"
   };
 
   public static void main(String[] args) {
@@ -51,12 +50,14 @@ public class UnitedBidding {
   public static void linesSortingWithEarlyHoursPenalty() {
     Utils.allLines.sort(new LineComparatorWithEarlyHoursPenalty());
     int rank = 1;
-    for (Line line : Utils.allLines) {
-      System.out.printf("Rank %3d   " + line + "\n", rank++);
-    }
 //    for (Line line : Utils.allLines) {
-//      System.out.println(line.number.substring(1));
+//      System.out.printf("Rank %3d   " + line + "\n", rank++);
 //    }
+    for (Line line : Utils.allLines) {
+      if (line.flights.stream().noneMatch(f -> Utils.allFlights.get(f).layovers.containsKey("TLV"))) {
+        System.out.println(line.number.substring(1));
+      }
+    }
   }
   @Test
   public static void linesDefaultSorting() {
@@ -85,7 +86,7 @@ public class UnitedBidding {
     }
   }
 
-  @Test
+  @Test (enabled = false) // buggy
   public static void linesSortingPayPerCalenderDay() {
     Utils.allLines.sort(new LineComparatorByCalenderDays());
     int rank = 1;

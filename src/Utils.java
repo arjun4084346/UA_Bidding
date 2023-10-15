@@ -23,7 +23,7 @@ public class Utils {
       "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
   static Map<String, Flight> allFlights = new HashMap<>();
   static List<Line> allLines = new ArrayList<>();
-  static List<Triple<String, String, String>> layovers = new ArrayList<>();
+  static List<Triple<String, String, String>> layovers = new ArrayList<>(); // layover airport, layover duration, flight number
   static List<Flight> sortedFlights;
   static int invalidLines = 0;
   static int invalidFlights = 0;
@@ -45,8 +45,9 @@ public class Utils {
 
   public static void loadFlights(Map<String, Flight> allFlights) {
     for (String file : UnitedBidding.FILES) {
-      FlightExtractor flightExtractor1 = new FlightExtractor();
-      FlightExtractor flightExtractor2 = new FlightExtractor();
+      Character flightPrefix = getFlightPrefix(file);
+      FlightExtractor flightExtractor1 = new FlightExtractor(flightPrefix);
+      FlightExtractor flightExtractor2 = new FlightExtractor(flightPrefix);
 
       try {
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -84,14 +85,24 @@ public class Utils {
     }
   }
 
+  private static Character getFlightPrefix(String file) {
+    if (file.contains("sfo")) {
+      return 'F';
+    } else if (file.contains("ewr")) {
+      return 'E';
+    }
+    return null;
+  }
+
   public static void loadLines(List<Line> allLines) {
-    LineExtractor lineExtractor = new LineExtractor();
     lineNumber = 0;
 
     for (String file : UnitedBidding.FILES) {
+      Character flightPrefix = getFlightPrefix(file);
+      LineExtractor lineExtractor = new LineExtractor(flightPrefix);
+
       try {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-
         String line;
         while ((line = reader.readLine()) != null) {
           lineNumber++;
@@ -118,9 +129,9 @@ public class Utils {
         e.printStackTrace();
         System.err.println("An error occurred while reading the file.");
       }
-    }
 
-    allLines.addAll(lineExtractor.lines);
+      allLines.addAll(lineExtractor.lines);
+    }
   }
 
   public static String minutesToHHmm(int minutes) {

@@ -1,6 +1,9 @@
 import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -27,7 +30,7 @@ public class Flight {
   int waitTimeInMinutes = 0;
   int waitTimeInMinutesPerFlight = 0;
   int numberOfFlights = 0;
-  List<Integer> layoverDurations = new ArrayList<>();
+  Map<String, List<Integer>> layovers = new HashMap<>();  // airport code, list of layover duration in minutes
   int numberOfFlightsWithGroundTime = 0;
   double earlyHourPenalty;
 

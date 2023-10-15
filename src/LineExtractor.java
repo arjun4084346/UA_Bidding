@@ -6,10 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 
 public class LineExtractor {
   String line;
+  Character flightPrefix;
   int crInMinutes;
   int tafbInMinutes;
   Line currentLine = new Line();
   List<Line> lines = new ArrayList<>();
+
+  public LineExtractor(Character flightPrefix) {
+    this.flightPrefix = flightPrefix;
+  }
 
   public void feedLine(String lineText) {
     if (Strings.isNullOrEmpty(lineText)) {
@@ -49,12 +54,15 @@ public class LineExtractor {
       if (token.length() <= 1) {
         continue;
       }
+      if (token.equals("NIGHT")) {
+        break;
+      }
       int i=0;
       while (i+4 <= token.length()) {
         String code = token.substring(i, i+4);
         i += 4;
-        if (StringUtils.isNumeric(code)) {
-          currentLine.flights.add("F" + code);
+        if (StringUtils.isAlphanumeric(code)) {
+          currentLine.flights.add(this.flightPrefix + code);
         }
       }
     }
