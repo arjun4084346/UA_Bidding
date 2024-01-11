@@ -49,7 +49,7 @@ public class Line {
         "%4s Total Pay/Hour = " + StringUtils.leftPad(String.format("$%.2f", this.totalPayPerHour), 6, ' ') +
             "   Total Pay = $%4.0f" +
             "   Total time = " + Utils.minutesToHHmm(this.totalTimeInMinutes) +
-            "   Total ground time = " + Utils.minutesToHHmm(this.totalTimeInMinutes) +
+            "   Total ground time = " + Utils.minutesToHHmm(this.waitTimeInMinutes) +
             "   Total flights = " + StringUtils.leftPad("" + this.flights.size(), 2, ' ') +
             "   Total calender days = " + StringUtils.leftPad("" + this.blockedDays, 2, ' ') +
             //(this.waitTimeInMinutesPerFlight == 0 ? "" : "   Total ground time per flight = " + Main.minutesToHHmm(this.waitTimeInMinutesPerFlight)),
